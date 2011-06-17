@@ -1,0 +1,147 @@
+.TH NCRYPT 8 "August 2004" NMRC "User Manuals"
+
+.SH NAME
+
+ncrypt \- NMRC File Encryptor/Decryptor/Wiper
+
+.SH SYNOPSIS
+
+.B ncrypt <-h> <-e|-d> <-z> <-w> <-v> <-V> <-k
+.I pass
+.B |-f 
+.I passfile
+.B > <-a
+.I algo
+.B > <-i
+.I infile
+.B > <-o
+.I outfile
+.B >
+
+.SH DESCRIPTION
+
+Ncrypt is intended to give you security in an insecure environment. If you
+are wanting to encrypt files (particularly on a multi-user system where you
+don't have root), wishing to hide your activites from prying eyes, and want
+to "cover your tracks", then Ncrypt is for you. It gives you the choice of
+three strong encryption algorithms and two secure file wiping options.
+
+For file encryption, Ncrypt is a symmetrical file encryptor/decryptor that 
+gives you the choice of the top three candidates for AES as the encryption
+algorithm (Rijndael (AES), Serpent, Twofish), tries to minimize exposure of 
+the plaintext password in memory, and can safely erase the plaintext version 
+from the hard drive. 
+
+The erasing of files uses techniques from two sources. The first set of
+techniques was originally outlined in Peter Gutmann's 1996 paper "Secure 
+Deletion of Data from Magnetic and Solid-State Memory". The second set of
+techniques was originally outlined in the DoD 5220.22-M standard developed
+by the NSA, specifically the recommendations for sanitizing drives for
+redeployment. For the insanely paranoid, yes you can use both options at the
+same time.
+ 
+For added security during wiping, the random data streams use the ISAAC PRNG 
+during wiping of files, and the wiping can take place either independently 
+or concurrently with encryption operations. The wiping routine also wipes 
+file slack. 
+
+Ncrypt compiles without any extra crypto libraries, making it ideal for 
+systems where you just have a compiler and basic libraries (such as an ISP's 
+shell server).
+
+.SH OPTIONS
+.IP "-h or --help"
+Display help/usage information and exit.  
+.IP "-e or --encrypt"
+Signifies you wish to encrypt a file. When encrypting you are asked for the
+password twice (to ensure you have entered it correctly).
+.IP "-d or --decrypt"
+Signifies you wish to decrypt a file. When decrypting you are asked for the
+password one time.
+.IP "-r or --rijndael or -a or --aes"
+Use the AES (Rijndael) algorithm for encryption/decryption. If no algorithm is 
+chosen, Rijndael is used by default.
+.IP "-s or --serpent"
+Use the Serpent algorithm for encryption/decryption.
+.IP "-t or --twofish"
+Use the Twofish algorithm for encryption/decryption.  
+.IP "-i or --input"
+Specify the input file \fIinfile\fP for ncrypt to either encrypt or decrypt. 
+If used with the -g or -m option during encryption, the input file specified 
+is wiped.
+.IP "-o or --output"
+Specify the output file \fIoutfile\fP for the results of ncrypt's encryption
+or decryption.
+.IP "-z or --encrypt-wipe"
+During encryption, wipe the input file after it has been encrypted using
+either the Gutmann or military method. If neither are chosen, military mode
+is used by default. Careful - the erased file is unrecoverable, which is
+kind of the point.
+.IP "-g or --wipe-gutmann"
+Do a `safe' erase of the input file (during encryption mode) or a specified
+file or files if not performing encryption/decryption operations. This
+overwrites the file on the hard drive with a series of 35 passes as outlined
+in Peter Gutmann's 1996 paper (see above) before erasing the file. File slack
+is also wiped using the same technique.
+.IP "-m or --wipe-military"
+This option runs like the -g or --wipe-gutmann option, except 3 passes are
+done. The first pass is a character, the second is the complement of that
+character (the bits are flipped), and the third is with random data which is
+verified. This is the military-grade standard for wiping files that are
+classified (does not apply to TOP SECRET classification). And like the -g or 
+--wipe-gutmann, use with caution as the file is not recoverable.
+.IP "-k or --key passphrase"
+This is a somewhat dangerous option, since you are using the passphrase on the
+command line, but it does allow you to include Ncrypt in batch files or cron
+jobs. Comes in handy for encrypting archived logs before using an insecure 
+plaintext method of copying them to another system, such as email. Just
+remember that the ps command could reveal the passphrase to anyone on the
+system. This option can be used for encryption or decryption.
+.IP "-f or --password-file filename.txt"
+Also a somewhat dangerous command, reads the passphrase from a file. The file
+must be a plaintext file, and the first line in the file that doesn't start
+with a pound (#) sign for comments is used as the passphrase. The ending
+carriage return is stripped off, and you can use up to a 255 character 
+passphrase. The file containing the password should be readable by the UID/EUID
+of the person or process running Ncrypt. Like the -k option, it comes in handy 
+for batch files and cron jobs, and it can be used for encryption or decryption.
+.IP "-v or --verbose"
+More verbose output during program execution.
+.IP "-V or --version"
+Print ncrypt version information and exit.
+
+.SH EXAMPLE USAGE
+.IP "\fBncrypt -e -s -i foo.txt -o bar.enc\fR"
+Encrypts plaintext file foo.txt and writes the encrypted file out as bar.enc.
+The Serpent algorithm is being used.
+.IP "\fBncrypt -d -i bar.enc -o foo.txt\fR"
+Decrypts encrypted file bar.enc and writes out plaintext file foo.txt. Since
+no algorithm is specified, AES (Rijndael) is used by default.
+.IP "\fBncrypt --encrypt --wipe-gutmann -i foo.txt -o bar.enc\fR"
+Encrypts plaintext file foo.txt and writes the encrypted file out as bar.enc.
+AES is being used, and the original foo.txt file using the Gutmann method.
+.IP "\fBncrypt -m foo.txt\fR"
+The file foo.txt is erased using the military method.
+.IP "\fBncrypt --wipe-gutmann foo.txt bar.txt foobar.txt\fR"
+The files foo.txt, bar.txt, and foobar.txt are wiped using the Gutmann method.
+.IP "\fBncrypt -e -z -k secretpassphrase -i foo.txt -o bar.enc\fR"
+The file foo.txt is encrypted with the password of "secretpassphrase" into
+bar.enc, and then foo.txt is securely wiped via the -z option with the default
+military method.
+
+.SH DIAGNOSTICS
+Errors from Ncrypt are written to stderr. There shouldn't be any bugs, because
+it compiled without errors ;-)
+
+.SH AUTHOR
+Ncrypt implementation by Simple Nomad <thegnome@nmrc.org>. Extensive code
+review and additional coding by Inertia <inertia@nmrc.org>. Additional coding 
+ideas, including the improved PRNG were added by Todd MacDermid 
+<tmacd@synacklabs.net>. Based upon code by Joh Johnson <jojo@farm9.com>, 
+which was taken from code by Gary Rancier, as well as code taken from Dave 
+Whiting's Twofish implementation. The read_pass.c routine is based upon 
+sample code in the excellent book "Building Secure Software" by John Viega
+and Gary McGraw.
+
+.SH BUGS
+Send bug reports to <thegnome@nmrc.org>.

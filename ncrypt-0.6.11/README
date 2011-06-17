@@ -1,0 +1,256 @@
+Ncrypt - NMRC file encryptor/decryptor/wiper
+         Simple Nomad <thegnome@nmrc.org>
+         Inertia <inertia@nmrc.org>
+
+	 Additional coding by Todd MacDermid <tmacd@synacklabs.net>
+         Based off of code from Joh Johannsen <jojo@farm9.com>, Gary 
+         Rancier <mephis5@softhome.net>, and Doug Whiting.
+
+
+IMPORTANT NOTE:
+---------------
+
+Files encrypted with version 0.6.9 or earlier are not compatible with version
+0.6.10 or higher. This due to a bugfix that was included in 0.6.10 that fixed
+a problem with alignment on binary encrypted files on the last block of data
+that was encrypted.
+
+Quick Start
+-----------
+
+Step one - untar and gunzip:
+
+$ tar xzf ncrypt-0.x.x.tgz
+
+Step two - compile:
+
+$ cd ncrypt-0.x.x
+$ ./configure
+$ make
+
+Step three - install (if you are root):
+
+# make install
+
+Otherwise simply copy the resulting ncrypt file to a local bin directory 
+in your path, such as $HOME/bin.
+
+For more details on using the configure script, see the INSTALL file.
+
+
+Features
+--------
+
+ - Open-source freeware.
+
+ - Should compile on any platform that supports standard C libraries (no 
+dependencies upon crypto libraries).
+
+ - Can handle fairly large files. The largest file tested was over 600MB.
+
+ - Use Rijndael, Serpent, or Twofish as the crypto algorithm. Rijndael is 
+the AES selected candidate, Serpent came in second, and Twofish third. For 
+details on AES and the selection process, check out 
+http://csrc.nist.gov/encryption/aes/ for more information.
+
+ - The plaintext password is converted to a SHA-1 hash and immediately 
+wiped from memory securely.
+
+ - Once the SHA-1 hash is used to make a key for crypto operations, the 
+SHA-1 hash is wiped from memory securely.
+
+ - If running as root, will lock process memory to prevent paging to disk,
+as the password, SHA-1 hash, and possibly parts of data could be written 
+to swap.
+
+ - Secure wiping of the input file during encryption is supported. The
+wiping mode can be used independently to erase select files.
+
+ - Two different methods of wiping are support -- one outlined by Peter
+Gutmann, and one outlined for military use as defined in DoD standard
+5220.22-M chapter 8.
+
+ - File slack is also securely erased during wiping operations.
+
+ - Using Peter Gutmann's wiping methods, the file is erased with the drive 
+space it occupies being overwritten thirty-five times. This is based on 
+Gutmann's 1996 paper entitled "Secure Deletion of Data from Magnetic and 
+Solid-State Memory", available from 
+http://www.cs.auckland.ac.nz/~pgut001/pubs/secure_del.html. 
+
+ - Using the NSA-developed military method (DoD 5220.22-M), the file is
+erased using three passes - one with a character, a second with its
+complement (the bits are flipped), and finally with random data. During the
+final pass, the writes are verified. Note that the DoD standard applies to
+data with a classification below TOP SECRET, and that this utility does not
+work on an entire disk drive (only individual files). It should be noted
+that a large number of products state "seven passes is the U.S. Government
+standard for wiping classified data". I can find no written record of any
+such standard, and when I asked some .gov and .mil folk about it, I was
+pointed to DoD 5220.22-M, and that specifically states three passes.
+
+ - Random data streams used during the wiping process is generated with the
+assistance of ISAAC PRNG.
+
+
+Why I Did This
+--------------
+
+The reason this software was done was simply because of neccessity. I had a 
+series of needs, and I could not find the software I needed. I needed 
+something that did not require extra libraries and could be compiled 
+easily on most systems, had multiple encryption algorithms, had security 
+and privacy in mind from the ground up, and had the ability to securely 
+wipe files.
+
+The Advanced Encryption System (AES) selection process looks promising 
+(details are at http://csrc.nist.gov/encryption/aes/), mainly because of 
+the peer review. It wasn't just a regular review by the government -- it 
+involved some of the world's best cryptographers outside of the NSA. Since 
+the selection process was close, and since you can bet that the top 3 
+entries were really good, I included those top three algorithms -- 
+Rijndael, Serpent, and Twofish.
+
+I wanted to include the ability to completely wipe the original file after 
+encryption. What good is it if you encrypt a file, when the plaintext 
+version can be recovered with a minimal amount of forensics effort? 
+Multiple passes over the file's space on the hard drive with zeroes and 
+random data was a must.
+
+No such program existed, so I did what many of us do -- I went out and 
+found source code that was close, and starting hacking together something 
+that was usable.
+
+
+Target User
+-----------
+
+Here is a list of what I perceive to be as the typical users of Ncrypt:
+
+Non-root users - If you have a shell account on someone else's system, 
+like a shell server at an ISP, and you want to encrypt files to protect 
+your privacy, Ncrypt was made for you. Odds are you won't be able to talk 
+the sys admin into installing some cool crypto library (or updating an 
+existing one), so you need something that will compile with basic C 
+libraries. You need something you can install yourself (say in $HOME/bin), 
+and you want to make sure the sys admin can't resurrect deleted plaintext 
+files to read your private documents. Ncrypt does that.
+
+Human rights worker - You need a simple and easy method to encrypt and 
+decrypt files, and prevent a hostile government who might seize your 
+computer from recovering your files -- even if they sneak into your hotel 
+room while you are gone, and try to do it without your knowledge. You need 
+a way to prevent the evil oppressors from recovering the plaintext 
+versions. Ncrypt will do that.
+
+Pen testers - Need a quick method to encrypt and decrypt files during a 
+penetration test, especially if you are wanting to move such things as 
+shadow password files and port scan results from the target network to a 
+different system? If you got in through a hole and are collecting data, 
+you don't want to leave that data sitting around in plaintext for a real 
+intruder or disgruntled employee to find. You may not be able to install 
+that crypto library on the production system you've compromised, so Ncrypt 
+will work just fine.
+
+Black hats - There is nothing more irritating than busting root on one 
+system, hopping from system to system, and some sys admin finds your 
+plaintext hacker tools and data. You could lose root on all those boxes! 
+Having a handy utility that can compile without crypto libraries, and that 
+can safely wipe annoying log files would be a great addition to any decent 
+rootkit. Ncrypt will work for you.
+
+
+Reporting Bugs
+--------------
+
+If you find a bug with the software, please let me know. I tried to ensure 
+that the software would not be a security risk itself, and I've tried to 
+get it to run as clean as possible. If for some reason the program 
+segfaults, the core file could contain plaintext data, so make sure you 
+thoroughly clean up after a segfault. Report bugs to thegnome@nmrc.org 
+along with the conditions that caused the problem. If you patch the bug, 
+send me a diff and I'll include it with credit (assuming the patch is 
+approved, can't have a patch introducing a security risk!).
+
+
+Potential Risks Associated with Ncrypt
+--------------------------------------
+
+In spite of the fact I've really tried to ensure the code is safe, there 
+are a few scenarios I have considered as potential risk areas. I will 
+outline those:
+
+ - Signals and memory diddling. It is possible that if you are a non-root 
+user on a system, root could send a signal or overwrite portions of memory 
+causing Ncrypt to core during Ncrypt's runtime. This could cause a 
+segfault, and root could cp or mv the core file to a protected directory 
+before you could securely wipe it, recovering part or all of the plaintext 
+file. This type of attack could be automated. NOTE: I may attempt to code 
+around this, but it will take some investigation, and me reading up on 
+signal handling. If ulimit is used to prevent coring, this helps, but a
+clever attacker running as root could still get around this.
+
+ - System call tracing. If you are non-root, root could decide to ptrace
+the Ncrypt process and recover the password or SHA-1 hash. If you can
+setgid to a non-privileged group (which may not be possible if you don't
+have root) this will help.
+
+ - Paging memory to disk. Normally for a security-related piece of code
+one would use mlock or mlockall to prevent paging memory to disk. However
+this is a privileged operation, and cannot be done if Ncrypt is running as
+non-root. Therefore it is possible that passwords or hashes could be written
+to the swap and recovered by the system owner.
+
+ - "Bad" system libraries. It is possible that some of the standard
+libraries on a system may be "tainted", and designed to intercept key
+read and write operations. The truly paranoid and untrusting may want to
+always compile Ncrypt statically on a known safe system, and copy the
+binary to the untrusted host before running.
+
+ - Kernel intercepts of system calls. There is the possibility that a 
+kernel modification or module could be loaded that sees Ncrypt opening 
+file handles, and then simply makes copies of all read operations to a 
+separate file. Granted this could be tricky when wiping during encryption, 
+but not impossible to code up. This could result in disclosure of your 
+plaintext file.
+
+ - Coding problem. It is possible that a buffer overflow, underflow, or 
+some other method for introducing a security problem could be found in 
+Ncrypt. Ncrypt was examined fairly extensively, but it is still possible 
+that a problem might be found.
+
+ - Crypto problem. There could be a problem in the coding of one or all of 
+the algorithms used in Ncrypt that is currently undiscovered, that when 
+exploited could result in cracking the encryption or key recovery. While 
+some of the best crypto people in the world looked at these 
+implementations during the AES selection process, some could still exist.
+
+ - Plaintext recovery of a military-wiped file. DoD 5220.22-M was 
+developed by the NSA for military use, and the sanitizing of disk drives
+was originally intended to allow a way for drives that contained data
+with a classification of less than TOP SECRET to be reused (as opposed to
+being simply destroyed). I have spoken with the now former NSA employee
+who developed the disk sanitizing methods to ensure I am "doing it
+correctly", which was developed in 1989 and was considered acceptable 
+for data with a classification of SECRET or lower. In cyber terms, 1989 
+was the Neolithic era, and in the face of modern forensic techniques, the
+data may still be recoverable. "Modern forensic techniques" in this 
+context basically includes heavily sophisticated technologies, such as 
+those employed by agencies such as the NSA or possibly another nation state.
+
+ - Plaintext recovery of a Gutmann-wiped file. In spite of the fact that 
+Peter Gutmann's excellent paper illustrates both recovery methods and 
+methods for thwarting recovery of deleted files in a seemingly logical 
+manner, it still seems possible that Mr. Gutmann's techniques are either
+incorrect or outdated in the face of the afore-mentioned "modern 
+forsenic techniques".
+
+ - RAID, journaled or logging file system. Any file system that does 
+mirroring, journaling, or is a logging file system, is basically designed 
+with data recovery in mind. Therefore there is a danger that on these types
+of file systems, the wiping routines may prove to be pointless. If you have
+a choice, use ext2 as testing showed The Coroner's Toolkit was unable to
+recover wiped files on that file system.
+
+Simple Nomad
+$Id: README,v 1.9 2004/08/09 14:48:20 s-nomad Exp $

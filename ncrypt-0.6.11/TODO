@@ -1,0 +1,24 @@
+TODO List
+---------
+
+This is a simple list of things to add to future versions:
+
+ - Either allow wildcards while wiping only, or split out the wiping routines
+into a separate file that can handle wildcards.
+
+ - If wiping with widlcards, allow recursion into subdirectories.
+
+ - Rename the file right after the wiping process but right before removing it
+from the drive, to prevent sensitive information from being revealed in the 
+filename itself. Same for subdirectories.
+
+ - Implement "triple Ncrypt". The way 3DES works is data is encrypted with DES
+three times -- once with a key, once with a second key, and a third time
+(usually with the first key again). Undecided how to implement the second key,
+I may go radical and simply ask for a second passphrase, will read up on it
+first though. It should work using all the algorithms in Ncrypt though.
+
+ - Figure out how to get djgpp to do file slack wiping and to not crap all
+over the verify parts of military wiping for the WIN32 version.
+
+$Id: TODO,v 1.2 2003/08/08 20:18:53 s-nomad Exp $

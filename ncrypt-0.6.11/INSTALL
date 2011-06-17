@@ -1,0 +1,21 @@
+NCrypt - The NMRC File Encryptor/Decryptor/Wiper Utility
+--------------------------------------------------------
+
+Your basic install cruft...
+
+The simplest way to compile this package is:
+
+1. ./configure
+
+2. make
+
+3. make install <-- Requires root if you're installing to /usr/local (the
+                    default), use ./configure --prefix=DIR to change the 
+                    install dir.
+
+If you require additional options, such as alternate compilers, etc.,
+try ./configure --help.
+
+If there are problems with ./configure (such as requiring different versions 
+of automake, etc), run the ./Build.sh script, then re-run ./configure.
+

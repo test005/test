@@ -1,0 +1,16 @@
+Source: ncrypt
+Section: unknown
+Priority: optional
+Maintainer: Inertia <inertia@nmrc.org>
+Build-Depends: debhelper (>> 3.0.0)
+Standards-Version: 3.5.2
+
+Package: ncrypt
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: file encryptor/decryptor/wiper
+ Ncrypt is a symmetrical file encryptor/decryptor that gives you the choice of
+ the top three candidates for AES as the encryption algorithm (Rijndael,
+ Serpent, Twofish).  Ncrypt also offers two file wiping options, for secure
+ and unrecoverable deletion of data, including file slack.
+

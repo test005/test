@@ -1,0 +1,160 @@
+HISTORY
+-------
+
+$Id: ChangeLog,v 1.14 2004/08/25 20:23:56 s-nomad Exp $
+
+0.6.11
+25Aug2004 - Completed testing of -f and -k options -SN
+
+11Aug2004 - Added -f to read the password from a file, similar to the -k
+            option. Updated the man page and replaced the INSTALL file
+            which I don't expect anyone to read anyway. Again redid the whole
+            configure.in etc. Added a Build.sh script in case there are
+            problems with ./configure on older systems. -SN
+
+09Aug2004 - Started some code cleanup while I was at it. Removed a couple of
+            unused variables in a routine in decrypt_file.c, and tweaked
+            getopt.c to get rid of a warning about a variable being used
+            uninitialized. I've added in one feature request for using ncrypt
+            in an "unattended" mode, using the -k to provide a password for
+            encryption/decryption from batch files. This is not safe, but it
+            does seem useful for such things as cronjobs that backup and
+            encrypt log files. All of the code changes are to ncrypt.c and a
+            minor tweak to ncrypt.h. -SN
+
+0.6.10
+09Aug2004 - Fixed a bug that was occuring during block alignment during the
+            decryption process with binary files. In doing so, I am having to
+            write the file size into the beginning of the encrypted file to
+            ensure not only the blocking works fine, but that only the right
+            amount of bytes are written to disk on the last block. While the
+            fix corrects the bug, unfortunately this means files encrpyted with
+            0.6.9 or earlier cannot be decrypted by 0.6.10 or later. But at 
+            least it is fixed. Bug reported by Alexander Dalloz.
+
+0.6.9
+16Mar2004 - Code is pretty ugly, hard to troubleshoot the post arg processing
+            so simplified things. Removed all of Inertia's code and redid
+            the entire getopt processing. There was a problem that if someone
+            forgot to specify the -e, ncrypt would interpret that as a wipe
+            only operation and securely wipe the input file. This is fixed.
+            General code cleanup on ncrypt.c, removed cmdline.c and cmdline.h
+            entirely. Will probably go through and clean up remaining code.
+
+0.6.8
+15Sep2003 - Naming conflict with XPG4.2 within unistd.h, renamed a routine.
+
+0.6.7
+09Sep2003 - Ugh. Dependency problems. Redid configure.in from scratch, and
+            redid all of the automake support files. Stuff seems to build 
+            and install ok now without too many errors. Edited cmdline.h
+            to eliminate non-printing of package and version info. Tweaked
+            the man page. Minor tweaks to rand_gen.c, cmdline.c, and
+            get_encryption_password.c to eliminate compilation errors.
+
+0.6.6
+16Aug2003 - Updated configure.ac so that it will work with autoconf 2.53.
+            Added 'debian' directory to version control.
+
+0.6.5
+03Aug2003 - Fixed minor typo in help info. Adjusted some logic in the main
+            program, as illogical parameter choices caused illogical things
+            to happen. Set default wipe mode to military if not specified.
+
+0.6.4
+14Jul2003 - NTFS and djgpp don't seem to get along when it comes to handling
+            the file slack wiping and the verify in military wiping, so
+            currently the WIN32 version does not support it. Completed the
+            WIN32 version, fixed minor bug with --aes option in cmdline.c.
+
+09May2003 - Added routines for doing DoD 5220.22-M style of wiping, giving the
+            choice of two wiping methods. The DoD method uses 3 passes, the
+            third pass being verified as it is being to disk. Added a -a
+            (--aes) option which simply points to Rijndael. Updated all of
+            the relevant files (README, man page, etc). Fixed a bug in the
+            install routine which tried to install the header files in this
+            distro.
+
+03May2003 - Added better error handling to wipe_file.c, and added routine to
+            perform wiping on file slack of file being wiped.
+
+01May2003 - fopen truncates the file before returning, so updated wipe_file
+            to use open instead. Wiping is much slower now, so added UI
+            indications in --verbose mode that something is actually
+            happening. Updated man page to make it more accurate.
+
+0.6.3
+26Apr2003 - Oops, odd logic bug caused ncrypt to never encrypt or decrypt
+            a file, only show the help screen, ugh. Adjusted read_pass to
+            use tcsetattr and tcgetattr, making the code more portable.
+            Minor tweaks in ncrypt.c and rand_gen.c so it will compile
+            under djgpp. Created a makefile for djgpp. Added local getopt
+            routines if target does not have getopt or getopt_long (Mac 
+            OS X, djgpp).
+
+0.6.2
+23Apr2003 - Two bugs in shuffling of order of the constant overwrites in
+            wipe_file.c, updated the README to reflect the current version.
+
+0.6.1
+22Apr2003 - Autoconf and automake. Use of long options as well. A lot of
+            code cleanup. Added, then removed I/O using stdin/stdout instead
+            of files (too many security issues as of yet).
+
+21Apr2003 - Switched the random number seeding algorithm used during
+            file deletion to one based on processor timing events, and
+            the PRNG from rand() to ISAAC. Also shuffled the order
+            of the constant overwrites, as recommended by Peter
+            Gutmann.
+
+0.5.5
+14Feb2003 - Fixed a bug that allowed -w to work during encryption, which
+            completely erased the input file and there was no output file
+            at all (oops). Applied patch so read_pass compiles and runs on
+            FreeBSD, and adjusted how memory is locked to prevent paging
+            (not all systems support mlockall).
+
+0.5.4
+30Jan2003 - Updated the wipe_file.c program to use the wiping techniques
+            discussed in "Secure Deletion of Data from Magnetic and Solid-State
+            Memory" by Peter Gutmann. The original paper can be found at
+            http://www.cs.auckland.ac.nz/~pgut001/pubs/secure_del.html. This
+            changes the wiping algo for a total of 35 overwrites. Updated
+            the README as well.
+31Dec2002 - Added mem.c routine so that if optimized, we don't rely on memset
+            but use our own. Updated the Makefile. Added a TODO file. Added
+            code to check for running as root, and if so try to mlockall to
+            prevent paging memory to disk. Updated the README.
+
+0.5.3       ** non-release **
+
+0.5.2
+19Dec2002 - Fixed minor bug in wipe_file routine. Minor code cleanup and updates
+            to the README and man page.
+17Dec2002 - Moved some random number stuff to rand_gen.c. Moved the wipe_file
+            routine to wipefile.c. Increased the overwrites to a total of
+            27 times (14 passes with zeroes, 13 passes with random material). 
+            Added -V switch to print version. Updated the man page.
+18Sep2002 - Added string.h to readpass.c to eliminate an error. Added a
+            HISTORY file.
+
+0.5.1
+09Sep2002 - Added README and built man page.
+05Sep2002 - Code cleanup, tweaks, and minor bugfixes to Twofish code. Added
+            WIPEONLY mode to do the wiping on a single file.
+04Sep2002 - Added Twofish, had to remove the key block size.
+
+0.4.1
+03Sep2002 - Adjusted key block size to a variable in ncrypt.h. Added install
+            routine to Makefile.
+31Aug2002 - Minor code cleanup, added code to wipe hash from memory after
+            it is no longer needed.
+
+0.4
+30Aug2002 - Major code cleanup (it now compiles without warnings), and uses
+            full ascii keyspace from the hash instead of a limited keyspace.
+            Also added file wiping ability on encryption.
+
+0.3
+29Aug2002 - Initial revision of ncrypt, first version that doesn't segfault ;-)
+
